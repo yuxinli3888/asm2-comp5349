@@ -156,7 +156,7 @@ final_df.show()
 
 final_df.count()
 
-final_df.coalesce(1).write.mode('Overwrite').format('json').save('/content/drive/MyDrive/Colab Notebooks/data/result.json')
+final_df.coalesce(1).write.mode('Overwrite').format('json').save('result.json')
 
 
 spark.stop()
