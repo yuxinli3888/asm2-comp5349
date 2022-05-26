@@ -86,13 +86,13 @@ qas_impossible_answer = answer.select('title','source','start','end','qas_id','q
 
 expand_df = qas_impossible_answer.select('title','source','start','end','qas_id','question','answer_state.*','text')
  
-expand_df.count()
+# expand_df.count()
 
 ## filter impossible question in a contract
 negative_question = expand_df.select('title','qas_id','question','is_impossible','answer_start','answer_end','source')\
                               .filter(col('is_impossible')=='impossible_negative')
  
-negative_question.count()
+# negative_question.count()
 
 positive = expand_df.select('title','source','question','qas_id','answer_start','answer_end','is_impossible')\
                               .filter(col('is_impossible')=='positive')
@@ -107,7 +107,7 @@ positive_avg = positive_question.join(positive,'title' and 'question','left')\
                   .avg('count')\
                   .select('question',round('avg(count)').alias('average')) 
                 
-positive_avg.count()
+# positive_avg.count()
 
 window = Window.partitionBy("question").orderBy("question")
 
@@ -125,11 +125,11 @@ negative.count()
 possible_negative_question = expand_df.select('qas_id','question','is_impossible','answer_start','answer_end','source')\
                               .filter(col('is_impossible')=='possible_negative')
  
-possible_negative_question.count()
+# possible_negative_question.count()
 
 positive_all= positive.groupby('qas_id')\
                        .count()
-positive_all.count()
+# positive_all.count()
 
 window = Window.partitionBy("qas_id").orderBy("qas_id")
 possible_negative = possible_negative_question.join(positive_all , 'qas_id','left')\
