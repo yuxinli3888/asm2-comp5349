@@ -20,11 +20,11 @@ spark = SparkSession \
  
 test_data = "s3://comp5349-2022/test.json"
 test_init_df = spark.read.json(test_data).select(explode('data').alias('data'))
-test_data_df= test_init_df.select('data.title',(explode("data.paragraphs").alias('paragraphs')))
+test_data_df= test_init_df.select(col('data.title').alias('title'),(explode("data.paragraphs").alias('paragraphs')))
 test_data_df.printSchema()
  
 
-context_df= test_data_df.select('title',col("paragraphs.context").alias('context'),col("paragraphs.qas"))
+context_df= test_data_df.select('title',col("paragraphs.context").alias('context'),col("paragraphs.qas").alias('qas'))
 context_df.printSchema()
 
 def seperate_word(context):
