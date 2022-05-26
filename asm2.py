@@ -3,17 +3,6 @@
  
 
 from pyspark.sql import SparkSession
-spark = SparkSession \
-    .builder \
-    .appName("COMP5349 A2 Data Loading Example") \
-    .getOrCreate()
-
-from pyspark.sql.functions import explode
-from pyspark.sql.functions import explode_outer
-test_data = "s3://comp5349-2022/test.json"
-test_init_df = spark.read.json(test_data).select(explode('data').alias('data'))
-test_data_df= test_init_df.select('data.title',(explode("data.paragraphs").alias('paragraphs')))
-test_data_df.printSchema()
 
 from pyspark.sql.functions import col, round
 from pyspark.sql.functions import udf
@@ -21,6 +10,19 @@ from pyspark.sql.functions import split
 from pyspark.sql.functions import row_number
 from pyspark.sql.types import *
 from pyspark.sql import Window
+from pyspark.sql.functions import explode
+from pyspark.sql.functions import explode_outer
+spark = SparkSession \
+    .builder \
+    .appName("COMP5349 A2 Data Loading Example") \
+    .getOrCreate()
+
+ 
+test_data = "s3://comp5349-2022/test.json"
+test_init_df = spark.read.json(test_data).select(explode('data').alias('data'))
+test_data_df= test_init_df.select('data.title',(explode("data.paragraphs").alias('paragraphs')))
+test_data_df.printSchema()
+ 
 
 context_df= test_data_df.select('title',col("paragraphs.context").alias('context'),col("paragraphs.qas"))
 context_df.printSchema()
