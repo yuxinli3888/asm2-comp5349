@@ -11,7 +11,7 @@ Original file is located at
 
 """# **Import Everything**"""
 
-from google.colab import drive
+ 
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import explode
 from pyspark.sql.functions import explode_outer
