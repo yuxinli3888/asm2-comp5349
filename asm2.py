@@ -21,11 +21,11 @@ spark = SparkSession \
 test_data = "s3://comp5349-2022/test.json"
 test_init_df = spark.read.json(test_data).select(explode('data').alias('data'))
 test_data_df= test_init_df.select(col('data.title').alias('title'),(explode("data.paragraphs").alias('paragraphs')))
-test_data_df.printSchema()
+# test_data_df.printSchema()
  
 
 context_df= test_data_df.select('title',col("paragraphs.context").alias('context'),col("paragraphs.qas").alias('qas'))
-context_df.printSchema()
+# context_df.printSchema()
 
 def seperate_word(context):
     start_end = []
@@ -54,7 +54,7 @@ context_expand_df = context.select('title',explode('context').alias('context'),'
 qas_df = context_expand_df.select('title','context',explode('qas').alias('qas'))
 
 qas_expand = qas_df.select('title','context.*',col('qas.id').alias('qas_id'),'qas.question','qas.is_impossible',explode_outer('qas.answers').alias('answers'))
-qas_expand.printSchema()
+# qas_expand.printSchema()
 
 answer = qas_expand.select('title','source','start','end','qas_id','question','is_impossible','answers.*')
 
@@ -82,7 +82,7 @@ answer_with_positionUDF = udf(negative_positive,answerSchema)
 qas_impossible_answer = answer.select('title','source','start','end','qas_id','question',\
                         answer_with_positionUDF(col('start'),col('end'),col('is_impossible'),col('answer_start'),col('text')).alias('answer_state'),\
                         'text')
-qas_impossible_answer.printSchema()
+# qas_impossible_answer.printSchema()
 
 expand_df = qas_impossible_answer.select('title','source','start','end','qas_id','question','answer_state.*','text')
  
@@ -100,7 +100,7 @@ positive = expand_df.select('title','source','question','qas_id','answer_start',
 positive_question = positive.groupby('title','question')\
                             .count()\
                  
-positive_question.show()
+# positive_question.show()
 
 positive_avg = positive_question.join(positive,'title' and 'question','left')\
                   .groupby('question')\
@@ -118,7 +118,7 @@ negative = negative_question\
                  .select('*')\
                  .where(col('question_order') <= col('average'))\
 
-negative.show()
+# negative.show()
 
 negative.count()
 
@@ -138,21 +138,21 @@ possible_negative = possible_negative_question.join(positive_all , 'qas_id','lef
                  .select('*')\
                  .where(col('question_order') <= col('count'))\
 
-possible_negative.show()
+# possible_negative.show()
 
 possible_negative.count()
 
-possible_negative.printSchema()
+# possible_negative.printSchema()
 
-positive.printSchema()
+# positive.printSchema()
 
-negative.printSchema()
+# negative.printSchema()
 
 final_df = negative.select('source','question','answer_start','answer_end')\
 .union(positive.select('source','question','answer_start','answer_end')\
        .union(possible_negative.select('source','question','answer_start','answer_end')))
 
-final_df.show()
+# final_df.show()
 
 final_df.count()
 
