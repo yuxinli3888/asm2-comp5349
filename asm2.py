@@ -127,7 +127,7 @@ qas_impossible_answer = answer.select('title','source','start','end','qas_id','q
 
 ## Get the result of samples after all expand and change is_possible attribute
 
-expand_df = qas_impossible_answer.select('title','source','start','end','qas_id','question','answer_state.*',col('text').alias('answer_text'))
+expand_df = qas_impossible_answer.select('title','source','start','end','qas_id','question','answer_state.*',col('text').alias('answer_text')).coalesce(100)
  
 # expand_df.count()
 
