@@ -33,7 +33,8 @@ spark = SparkSession \
     .getOrCreate()
 
 ## Read data and explode data, because data is an array, so use explode to splite array item into multiple rows
-test_data = "s3://comp5349-2022/test.json"
+# test_data = "s3://comp5349-2022/test.json"
+test_data = "s3://comp5349-2022/train_separate_questions.json"
 test_init_df = spark.read.json(test_data).select(explode('data').alias('data'))
 
 ## explode paragraphs into multiple rows, include title as well, which specify different contracts
