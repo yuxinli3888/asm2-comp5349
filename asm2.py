@@ -40,13 +40,13 @@ test_init_df = spark.read.json(test_data).select(explode('data').alias('data'))
 ## explode paragraphs into multiple rows, include title as well, which specify different contracts
 test_data_df= test_init_df.select(col('data.title').alias('title'),(explode("data.paragraphs").alias('paragraphs')))
 
-test_data_df.printSchema()
+# test_data_df.printSchema()
 
 """# **Data Processing And Collect All Samples**"""
 
 ## get context value, set it into one column
 context_df= test_data_df.select('title',col("paragraphs.context").alias('context'),col("paragraphs.qas").alias('qas'))
-context_df.printSchema()
+# context_df.printSchema()
 
 ## UDF function to seperate context
 ## the start position is 0 and end position is 4096 at the beginning
@@ -87,7 +87,7 @@ qas_df = context_expand_df.select('title','context',explode('qas').alias('qas'))
 
 ## expand answer, use explode_outer because some rows' answer value is null
 qas_expand = qas_df.select('title','context.*',col('qas.id').alias('qas_id'),'qas.question','qas.is_impossible',explode_outer('qas.answers').alias('answers'))
-qas_expand.printSchema()
+# qas_expand.printSchema()
 
 ## expand answers' start position and text
 
@@ -123,17 +123,17 @@ answer_with_positionUDF = udf(negative_positive,answerSchema)
 qas_impossible_answer = answer.select('title','source','start','end','qas_id','question',\
                         answer_with_positionUDF(col('start'),col('end'),col('is_impossible'),col('answer_start'),col('text')).alias('answer_state'),\
                         'text')
-qas_impossible_answer.printSchema()
+# qas_impossible_answer.printSchema()
 
 ## Get the result of samples after all expand and change is_possible attribute
 
 expand_df = qas_impossible_answer.select('title','source','start','end','qas_id','question','answer_state.*',col('text').alias('answer_text')).coalesce(400)
  
-expand_df.count()
+# expand_df.count()
 
 ## show the result of all samples
 
-expand_df.show()
+# expand_df.show()
 
 """# **Make Impossible Negative Samples Number Equals to Average**"""
 
@@ -141,7 +141,7 @@ expand_df.show()
 negative_question = expand_df.select('title','qas_id','question','is_impossible','answer_start','answer_end','source')\
                               .where(col('is_impossible')=='impossible_negative')
  
-negative_question.count()
+# negative_question.count()
 
 ## filter out positive samples in a contract
 
@@ -152,9 +152,9 @@ positive = expand_df.select('title','source','question','qas_id','answer_start',
 positive_question = positive.groupby('title','question')\
                             .count()\
                  
-positive_question.count()
+# positive_question.count()
 
-positive.printSchema()
+# positive.printSchema()
 
 ## calculate the positive sample average among contracts
 ## do an average operation into these counted number
@@ -163,7 +163,7 @@ positive_avg = positive_question.groupby('question')\
                   .avg('count')\
                   .select('question',round('avg(count)').alias('average')) 
                 
-positive_avg.count()
+# positive_avg.count()
 
 ## Use window partitionBy to give all row number and group by question, inorder to choose rows
 ## if the row number (question order) is less or equal to average number of that row, then the result can be chose
@@ -180,13 +180,13 @@ negative = negative_question\
                  .select('*')\
                  .where(col('question_order') <= col('average'))\
 
-negative.printSchema()
+# negative.printSchema()
 
 ## show impossible_negative result
-negative.show()
+# negative.show()
 
 ## count the impossible_negative result
-negative.count()
+# negative.count()
 
 """# **Make Possible Negative Samples Number Equal To Positive Samples Number**"""
 
@@ -194,12 +194,12 @@ negative.count()
 possible_negative_question = expand_df.select('qas_id','question','is_impossible','answer_start','answer_end','source')\
                               .where(col('is_impossible')=='possible_negative')
  
-possible_negative_question.count()
+# possible_negative_question.count()
 
 ## count all positive samples of different questions in different contracts                        
 positive_all= positive.groupby('qas_id')\
                        .count()
-positive_all.count()
+# positive_all.count()
 
 ## Use window partitionBy to give all row number and group by question id, inorder to choose rows
 ## if the row number (question order) is less or equal to total number(count) of that row, then the result can be chose
@@ -215,13 +215,13 @@ possible_negative = possible_negative_question.join(positive_all , 'qas_id','lef
                  .select('*')\
                  .where(col('question_order') <= col('count'))\
 
-possible_negative.printSchema()
+# possible_negative.printSchema()
 
 ## show the possible negative result
-possible_negative.show()
+# possible_negative.show()
 
 ## count the number of possible negative result
-possible_negative.count()
+# possible_negative.count()
 
 """# **Union impossible_negative, possible_negative and possible result**"""
 
@@ -230,10 +230,10 @@ final_df = negative.select('source','question','answer_start','answer_end')\
        .union(possible_negative.select('source','question','answer_start','answer_end')))
 
 ## show the final result
-final_df.show()
+# final_df.show()
 
 ## count the result
-final_df.count()
+# final_df.count()
 
 """# **Output Result To JSON File**"""
 
